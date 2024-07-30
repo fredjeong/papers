@@ -42,7 +42,7 @@ Note that here the authors differentiated $\theta_i$ and $\theta_i^-$, where $\t
 
 The authors used the Atari 2600 platform to test the DQN agent. When compared with the best performing reinforcement learning methods, on 43 games out of 43 the DQN agent outperformed them. It is worth noting that the games in which DQN excels are varied in their nature, from side-crolling shooters to boxing games and three-dimensional car-racing games, although games demanding more temporally extended planning strategies are challenging for all existing agents including DQN.
 
-## Training Algorithm for deep Q-networks**
+## Training Algorithm for deep Q-networks
 
 ![스크린샷 2024-07-29 21 15 43](https://github.com/user-attachments/assets/d9179419-3c50-44d2-939e-7ec81759d57f)
 
