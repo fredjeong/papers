@@ -28,7 +28,7 @@ Although there already exists other stable methods for training neural networks 
 
 In a deep Q-network, the authors parameterise an approximate value function $Q(s,a;\theta_i)$ using the deep convolutional neural network, where $\theta_i$ are the parameters of the Q-network at iteration $i$. 
 
-The agent's experiences at each time-step $t$ are stored as **trajectories** in a dataset $D_t=\{e_1,\cdots,e_t\}$ where $e_t=(s_t,a_t,r_t,s_{t+1})$. During learning, Q-learning updates are applied on samples of experience $(s,a,r,s')\sim U(D)$. These samples are drawn uniformly from $D$. The resulting update at iteration $i$ uses the following loss function:
+The agent's experiences at each time-step $t$ are stored as **trajectories** in a dataset $D_t={e_1,\cdots,e_t}$ where $e_t=(s_t,a_t,r_t,s_{t+1})$. During learning, Q-learning updates are applied on samples of experience $(s,a,r,s')\sim U(D)$. These samples are drawn uniformly from $D$. The resulting update at iteration $i$ uses the following loss function:
 
 $$
 \begin{align}
