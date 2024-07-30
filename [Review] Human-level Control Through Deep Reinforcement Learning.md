@@ -10,7 +10,7 @@ In this paper the authors introduce a artificial agent called a deep Q-network. 
 
 The authors used the deep convolutional network, which uses hierarchical layers of toiled convolutional filters to mimic the effects of receptive fields and therefore are able to exploit the local spatial correlations present in images.
 
-The tasks given are such that the agent **interacts with an environment** through a sequence of **observations, actions and rewards**, where the goal of the agent is to select such actions that maximise cumulative future reward. Mathematically, this process is using a deep convolutional neural network to approximate the optimal **action-value function:
+The tasks given are such that the agent **interacts with an environment** through a sequence of **observations, actions and rewards**, where the goal of the agent is to select such actions that maximise cumulative future reward. Mathematically, this process is using a deep convolutional neural network to approximate the optimal **action-value function**:
 
 $$
 \begin{align}
