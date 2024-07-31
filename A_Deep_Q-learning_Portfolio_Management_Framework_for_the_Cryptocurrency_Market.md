@@ -1,4 +1,4 @@
-# A deep Q-learning portfolio management framework for the cryptocurrency market
+# A Deep Q-learning Portfolio Management Framework for the Cryptocurrency Market
 
 # 1. Introduction
 
