@@ -10,94 +10,116 @@
 - [https://velog.io/@rockgoat2/Reinforcement-Learning-PPO-알고리즘-리뷰](https://velog.io/@rockgoat2/Reinforcement-Learning-PPO-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98-%EB%A6%AC%EB%B7%B0)
 
 # 1. Introduction
+Trust region policy optimisation (TRPO) was suggested to address the issues with prior policy gradient methods [[1](https://proceedings.mlr.press/v37/schulman15.pdf)]. However, despite its efficiency and robustness, the method is relatively complicated compared to other methods and is not compatible with architectures that include noise (such as dropout) or parameter sharing (between the policy and value function).
+
+The authors introduce proximal policy optimisation that shows as much efficiency and strong performance as TRPO only using first-order optimisation. The key idea in this paper is using clipped probability ratios that forms a lower bound of the performance.
 
 # 2. Background: Policy Optimisation
 
 ## 2.1 Policy Gradient Methods
 
+Policy gradient methods work by computing an estimator of the policy gradient and plugging it into a stochastic gradietn ascent algorithm. The estimator here is written as:
+
+$$
+\begin{align}
+\nabla_\theta J(\theta)=\hat {\mathbb E}_t \left[ \nabla _\theta \log \pi _\theta(a_t\mid s_t)\hat A_t \right]
+\end{align}
+$$
+
+where $\pi_\theta$ is the policy and $\hat A_t$ is an estimator of the advantage function at timestep $t$.
+
+Therefore, we update the policy parameters by differentiating the loss function
+
+$$
+\begin{align}
+L(\theta)= \hat{\mathbb E}_t \left[ \log \pi _\theta(a_t\mid s_t)\hat A_t \right].
+\end{align}
+$$
+
 ## 2.2 Trust Region Methods
 
-TRPO 논문에서는 특정 constraint 이내에서 objective function(”surrogate” objective)가 최대화 되는 policy로 업데이트를 진행하고, 이를 trust region methods라고 한다. (importance sampling 원리)
+In TRPO, an objective function is expressed as a surrogate function and is maximised subject to a constraint on the size of the policy update. That is, we define the problem as
 
 $$
 \begin{gather}
-\max_\theta\hat{\mathbb E}_t\left[ \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{old}}(a_t\mid s_t)} \hat A_t \right]
+\max_\theta\hat{\mathbb E}_t\left[ \frac{\pi _\theta(a_t\mid s_t)}{\pi _{\theta _{old}}(a_t\mid s_t)} \hat A_t \right]
 \\
-\text{subject to }\hat{\mathbb E}_t\left[ \text{KL}[\pi_{\theta_{old}}(\cdot\mid s_t),\pi_\theta(\cdot\mid s_t)] \right]\leq\delta
+\text{subject to }\hat{\mathbb E}_t\left[ \text{KL}[\pi _{\theta _{old}}(\cdot\mid s_t),\pi _\theta(\cdot\mid s_t)] \right]\leq\delta
 \end{gather}
 $$
 
-그런데 $\theta_{old}$는 policy가 업데이트되기 전의 매개변수이다. 즉, 업데이트 되기 전 매개변수와 크게 차이가 나지 않는 범위 내의 새 매개변수들을 이용해 만든 새 policy인 $\pi_\theta(a_t\mid s_t)$와 $\pi_{\theta_{old}}(a_t\mid s_t)$를 이용해서 importance sampling을 수행한다.
+where $\theta_{old}$ is the policy parameters before the update. This problem is approximately solved using the conjugate gradient algorithm, by linearly approximating the objective function and quadratically approximating the constraint.
 
-Schulman은 처음 TRPO를 정의할 때 특정 surrogate objective가 policy $\pi$의 성능을 보장하기 위한 lower bound를 형성한다는 개념을 따라 constraint 방법이 아니라 아래와 같이 coefficient $\beta$를 가진 penalty 방법을 제시하였다.
+Originally, the theory on which TRPO is based uses a penalty term instead of a constraint. That is, solving an unconstrained optimisation problem
 
 $$
-\max_\theta \hat{\mathbb E}_t\left[ \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{old}}(a_t\mid s_t)}\hat A_t - \beta\text{KL}[\pi_{\theta_{old}}(\cdot\mid s_t),\pi_\theta(\cdot\mid s_t)] \right]
+\max_\theta \hat{\mathbb E}_t \left[ \frac{ \pi _\theta(a_t\mid s_t)}{\pi _{\theta _{old}}(a_t\mid s_t)}\hat A_t - \beta\text{KL}[\pi _{\theta _{old}} (\cdot\mid s_t),\pi _\theta(\cdot\mid s_t)] \right]
 $$
 
-그럼에도 constraint 방법을 사용하는 이유는 학습하는 도중에도 특성의 변화가 많아서 고정된 $\beta$를 결정하기 어렵기 때문이다. 
-
-그러므로, TRPO와 같이 성능을 보장할 수 있는 policy optimisation을 first-order algorithm으로 계산하려면 추가적인 개선이 필요하다.
+for some coefficient $\beta$. However, it is hard to choose the fixed value of $\beta$ as the characteristics change over the course of learning. Therefore, in this paper the authors add additional modificiations.
 
 # 3. Clipped Surrogate Objective
+Let $r_t$ denote the probability ratio $\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{old}}(a_t\mid s_t)}$ so we have $r(\theta_{old})=1$. In TRPO we maximise a surrogate objective function
 
-Importance sampling에 쓰이는 것처럼, 다음을 정의하자.
-
-$$
-r_t(\theta)=\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{old}}(a_t\mid s_t)}
-$$
-
-여기서, TRPO는 다음의 surrogate function을 최대화한다 (위에 언급됨)
 
 $$
-L^{CPI}(\theta)=\hat{\mathbb E}_t\left[ \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{old}}(a_t\mid s_t)}\hat A_t \right]=\hat{\mathbb E}_t\left[ r_t(\theta)\hat A_t \right]
+L^{CPI}(\theta)=\hat{\mathbb E}_t\left[ \frac{\pi _\theta(a_t\mid s_t)}{\pi _{\theta _{old}}(a_t\mid s_t)}\hat A_t \right]=\hat{\mathbb E}_t\left[ r_t(\theta)\hat A_t \right]
 $$
 
-*CPI는 conservative policy iteration의 약자.
-
-만약 여기서 constraint가 따로 존재하지 않는다면 policy update가 큰 스텝으로 진행될 것이고, 그러면 monotonous improvement를 보장할 수 없다. 따라서, policy change에 페널티를 부과한다. ($\pi_{\theta_{old}}$에서 너무 많이 벗어나지 않도록).
-
-이를 위해 clip을 적용한 새로운 surrogate objective는 다음과 같다.
+Here, CPI stands for conservative policy iteration. Maximising $L^{CPI}$ will excessively update the policy without a constraint. Thus, it is required that we modify the objective in such a way that penalises changes to the policy that move $r_t(\theta)$ away from 1. That is, we maitain the "distance" between $\pi_\theta$ and $\pi_{\theta_{old}}$ by writing:
 
 $$
-L^{CLIP}(\theta)=\hat {\mathbb E}_t\left[ \min\left(r_t(\theta)\hat A_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)\hat A_t \right)\right]
+L^{CLIP}(\theta)=\hat {\mathbb E}_t\left[ \min\left(r_t(\theta)\hat A_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)\hat A_t \right)\right].
 $$
 
-논문에서는 hyperparameter $\epsilon$을 0.2로 설정했다.
+By doing so, we remove the incentive for moving $r_t$ outside of the interval $[1-\epsilon,1+\epsilon]$. 
+Initially, when $r_t(\theta)=1$, we have $L^{CPI}=L^{CLIP}$. As $\theta$ moves away from $\theta_{old}$ they become different. In the figure below we can see that the probability ratio $r$ is clipped at $1-\epsilon$ or $1+\epsilon$. This makes $L^{CLIP}$ as the lower bound of $L^{CPI}$ with **penalty for having too large of a policy update.**
 
-이렇게 하면 $r_t$가 $[1-\epsilon,1+\epsilon]$ 밖으로 벗어날 유인(incentive)이 사라진다. clip된 값과 $r_t(\theta)\hat A_t$를 비교해서 더 작은 값을 취하므로 lower bound를 형성하는 데 의미가 있다.
-
-![스크린샷 2024-07-23 16.02.18.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/e32255d7-f1d1-45eb-81e3-06e46c789c7a/6effc2f5-f446-4714-8555-60487b8cb8f7/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-23_16.02.18.png)
-
-이런 식으로 penalty를 부과하는 것. 잘 보면 $L^{CLIP}$이 $L^{CPI}$의 lower bound를 형성하는 것을 알 수 있다.
-
-![스크린샷 2024-07-23 16.05.10.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/e32255d7-f1d1-45eb-81e3-06e46c789c7a/203d6346-bb30-4021-a488-9335697c1fb8/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-23_16.05.10.png)
-
-만약 clip을 설정하지 않으면 위 그림의 파란색 선처럼 정책이 너무 과감하게 update될 수 있고, 그러면 importance sampling의 의미가 사라진다.
+![스크린샷 2024-07-31 15 31 13](https://github.com/user-attachments/assets/f9e76d52-67c0-4d5d-baf1-c9ad1d50fbee)
 
 # 4. Adaptive KL Penalty Coefficient
 
-Clip을 쓰는 대신 다른 방법으로는 KL divergence에 페널티를 부과하는 방법이 있다. 앞에서 고정된 $\beta$는 적절치 않다고 했으니, 여기서는 $\beta$를 adaptive하게 변화시켜주는 것.
+Another approach is to use a penalty on KL divergence, and to adapt the penalty coefficient. That is, in the equation suggested in TRPO we change the value of $\beta$ adaptively.
 
-$\beta$를 어떻게 정하든 default 값과 그 성능이 크게 차이나지 않는다. 알고리즘이 빨리 adjust하기 때문 
+$$
+L^{KLPEN} \hat{\mathbb E}_t \left[ \frac{ \pi _\theta(a_t\mid s_t)}{\pi _{\theta _{old}}(a_t\mid s_t)}\hat A_t - \beta\text{KL}[\pi _{\theta _{old}} (\cdot\mid s_t),\pi _\theta(\cdot\mid s_t)] \right]
+$$
 
-하지만 실험 결과 clipping 방식이 더 뛰어난 것으로 나타남
+However, this approach did not perform as well as the clipping method.
 
 # 5. Algorithm
 
-policy function과 value function이 parameter를 공유하도록 인공신경망을 설계한다면 policy surrogate와 value function error term을 결합한 loss function을 사용해야 한다. 이 목적 함수는 충분한 탐험을 보장하기 위한 entropy bonus가 추가될 수도 있고, 그 식은 다음과 같다.
+We use a neural network architecture that shares parameters between the policy and value function. For this, we must use a loss function that combines the policy surrogate and a value function error term. Adding an entropy bonus as in [[2](https://link.springer.com/content/pdf/10.1007/BF00992696.pdf)], we have
 
 $$
-L_t^{CLIP+VF+S}(\theta)=\hat{\mathbb E}_t\left[ L_t^{CLIP}(\theta)-c_1L_t^{VF}(\theta)+c_2 S[\pi_\theta](s_t) \right]
+\begin{align}
+L_t^{CLIP+VF+S}(\theta)=\hat{\mathbb E}_t\left[ L _t^{CLIP}(\theta)-c _1 L _t^{VF}(\theta)+c_2 S[\pi _\theta](s _t) \right]
+\end{align}
 $$
 
-여기서 $c_1,c_2$는 계수, $S$는 entropy bonus이고, $L_t^{VF}$는 squared-error loss $(V_\theta(s_t)-V_t^{targ})^2$이다.
+where $c_1, c_2$ are coefficients, $S$ is an entropy bonus, and $L_t^{VF}$ is a squared-error loss $(V_\theta(s_t)-V_t^{targ})^2$
 
-에피소드의 길이보다 짧은 $T$개의 timestep만큼 policy를 진행시키고, 여기서 얻은 샘플들로 업데이트를 진행한다. 이 때, Advantage estimator $\hat A$는 timestep $T$ 이후를 관측하지 않는다. 
+The algorithm is below. Each iteration, each of $N$ (parallel) actors collect $T$ timesteps of data (much less than the length of the episode). For this purpose, we use the concept of GAE (generalised advantage estimation) instead of $n$-step TD [[3](https://arxiv.org/pdf/1506.02438)]. We implement an advnatage estimator that does not look beyond timestep $T$, suggested by [[4](https://arxiv.org/pdf/1602.01783)]:
 
-매 iteration마다, $N$개의 parallel한 actor가 $T$개의 샘플들을 모으고, 이 $NT$개의 샘플에 대해 surrogate loss를 계산, minibatch SGD나 Adam을 이용하여 최적화시킨다.
+$$
+\begin{align}
+\hat A_t = -V(s_t) + r_t + \gamma r_{t+1} + \cdots + \gamma^{T-t+1}r_{T-1}+\gamma^{T-t}V(s_T)
+\end{align}
+$$
 
-![스크린샷 2024-07-23 16.26.47.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/e32255d7-f1d1-45eb-81e3-06e46c789c7a/af9b1719-1190-4d60-b5c6-b43d847f937f/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-23_16.26.47.png)
+where $t$ specifies the time index in [0,T] within a given length-$T$ trajectory segment. Using this, we find the exponential moving average of the infinite-step TD error as
+
+$$
+\begin{align}
+\hat A_t = \delta_t + (\gamma\lambda)\delta_{t+1} + \cdots + (\gamma\lambda)^{T-t+1}\delta_{T-1}
+\end{align}
+$$
+
+where $\delta_t = r_t+\gamma V(s_{t+1} - V(s_t)}.
+
+Then we construct the surrogate loss on these $NT$ timesteps of data, and optimise it with minibatch SGD or Adam, for $K$ epochs.
+
+![스크린샷 2024-07-31 15 53 56](https://github.com/user-attachments/assets/86d17786-35b6-446f-b61d-b940233cd070)
 
 # 6. Experiments
 
