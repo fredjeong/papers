@@ -12,7 +12,7 @@ Most of the papers are focused on deep learning and reinforcement learning.
 - [Continuous Control with Deep Reinforcement Learning](Continuous_Control_with_Deep_Reinforcement_Learning.md)
 
 ## DRL + Portfolio Management
-- [Deep Reinforcement Learning for Automated Stock Trading: An Ensemble Strategy](Deep_Reinforcement_Learning_for_Automated_Stock_Trading:_An_Ensemble_Strategy.md)
+- [Deep Reinforcement Learning for Automated Stock Trading: An Ensemble Strategy](Deep_Reinforcement_Learning_for_Automated_Stock_Trading_An_Ensemble_Strategy.md)
 - [A Deep Q-learning Portfolio Management Framework for the Cryptocurrency Market](A_Deep_Q-learning_Portfolio_Management_Framework_for_the_Cryptocurrency_Market.md)
 - [Cryptocurrency Portfolio Management with Deep Reinforcement Learning](Cryptocurrency_Portfolio_Management_with_Deep_Reinforcement_Learning.md)
 
