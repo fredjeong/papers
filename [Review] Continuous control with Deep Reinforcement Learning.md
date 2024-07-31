@@ -1,4 +1,4 @@
-# Continuous control with Deep Reinforcement Learning
+# Continuous Control with Deep Reinforcement Learning
 - Author: Timothy P. Lillicrap , Jonathan J. Hunt , Alexander Pritzel, Nicolas Heess, Tom Erez, Yuval Tassa, David Silver, and Daan Wierstra
 - Journal: ICLR
 - Year: 2016
