@@ -1,13 +1,8 @@
 # Proximal Policy Optimization Algorithms
-
-# 0. About this paper
-
-- OpenAI에서 2017년 발표한 논문
-- John Schulman의 policy optimisation 알고리즘
-- 기존의 TRPO가 너무 복잡한 반면, 쉬운 구현과 상징성의 이유로 아직까지 가장 유명한 알고리즘으로 꼽힌다. TRPO를 발전시킨 것
-- 데이터를 environment와 상호작용하면서 가져오고, SGD를 이용해 surrogate 목적함수를 업데이트
-- https://ropiens.tistory.com/85
-- [https://velog.io/@rockgoat2/Reinforcement-Learning-PPO-알고리즘-리뷰](https://velog.io/@rockgoat2/Reinforcement-Learning-PPO-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98-%EB%A6%AC%EB%B7%B0)
+- Author: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov
+- Journal:
+- Year: 2017
+- Link: [[pdf](https://arxiv.org/pdf/1707.06347)]
 
 # 1. Introduction
 Trust region policy optimisation (TRPO) was suggested to address the issues with prior policy gradient methods [[1](https://proceedings.mlr.press/v37/schulman15.pdf)]. However, despite its efficiency and robustness, the method is relatively complicated compared to other methods and is not compatible with architectures that include noise (such as dropout) or parameter sharing (between the policy and value function).
