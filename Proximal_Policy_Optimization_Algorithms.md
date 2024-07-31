@@ -48,7 +48,9 @@ where $\theta_{old}$ is the policy parameters before the update. This problem is
 Originally, the theory on which TRPO is based uses a penalty term instead of a constraint. That is, solving an unconstrained optimisation problem
 
 $$
+\begin{align}
 \max_\theta \hat{\mathbb E}_t \left[ \frac{ \pi _\theta(a_t\mid s_t)}{\pi _{\theta _{old}}(a_t\mid s_t)}\hat A_t - \beta\text{KL}[\pi _{\theta _{old}} (\cdot\mid s_t),\pi _\theta(\cdot\mid s_t)] \right]
+\end{align}
 $$
 
 for some coefficient $\beta$. However, it is hard to choose the fixed value of $\beta$ as the characteristics change over the course of learning. Therefore, in this paper the authors add additional modificiations.
@@ -58,13 +60,17 @@ Let $r_t$ denote the probability ratio $\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\the
 
 
 $$
+\begin{align}
 L^{CPI}(\theta)=\hat{\mathbb E}_t\left[ \frac{\pi _\theta(a_t\mid s_t)}{\pi _{\theta _{old}}(a_t\mid s_t)}\hat A_t \right]=\hat{\mathbb E}_t\left[ r_t(\theta)\hat A_t \right]
+\end{align}
 $$
 
 Here, CPI stands for conservative policy iteration. Maximising $L^{CPI}$ will excessively update the policy without a constraint. Thus, it is required that we modify the objective in such a way that penalises changes to the policy that move $r_t(\theta)$ away from 1. That is, we maitain the "distance" between $\pi_\theta$ and $\pi_{\theta_{old}}$ by writing:
 
 $$
+\begin{align}
 L^{CLIP}(\theta)=\hat {\mathbb E}_t\left[ \min\left(r_t(\theta)\hat A_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)\hat A_t \right)\right].
+\end{align}
 $$
 
 By doing so, we remove the incentive for moving $r_t$ outside of the interval $[1-\epsilon,1+\epsilon]$. 
@@ -77,7 +83,9 @@ Initially, when $r_t(\theta)=1$, we have $L^{CPI}=L^{CLIP}$. As $\theta$ moves a
 Another approach is to use a penalty on KL divergence, and to adapt the penalty coefficient. That is, in the equation suggested in TRPO we change the value of $\beta$ adaptively.
 
 $$
+\begin{align}
 L^{KLPEN} \hat{\mathbb E}_t \left[ \frac{ \pi _\theta(a_t\mid s_t)}{\pi _{\theta _{old}}(a_t\mid s_t)}\hat A_t - \beta\text{KL}[\pi _{\theta _{old}} (\cdot\mid s_t),\pi _\theta(\cdot\mid s_t)] \right]
+\end{align}
 $$
 
 However, this approach did not perform as well as the clipping method.
