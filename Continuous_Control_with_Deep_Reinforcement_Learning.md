@@ -53,7 +53,7 @@ The use of large, non-linear function approximators for learning value or action
 
 In continuous action spaces finding the greedy policy requires an optimisation of $a_t$ at every tmiestep, which is too slow to be practical with large and unconstrained function approximators and nontrivial action spaces. Instead, we use an actor-critic approach based on the DPG algorithm. 
 
-We maintain a parameterised actor function $\mu(s\mid \theta^\mu) that specifies the current policy by mapping states to a specific action deterministically. The critic $Q(s,a)$ is then updated by applying the chain rule to the expected return from the start distribution $J$ with respect to the actor parameters:
+We maintain a parameterised actor function $\mu(s\mid \theta^\mu)$ that specifies the current policy by mapping states to a specific action deterministically. The critic $Q(s,a)$ is then updated by applying the chain rule to the expected return from the start distribution $J$ with respect to the actor parameters:
 
 $$
 \begin{align}
